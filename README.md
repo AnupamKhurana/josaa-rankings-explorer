@@ -86,6 +86,6 @@ To fetch fresh records from the admissions portal, run the scripts inside the `d
 
 ## Credits & Contributions
 
-- **Concept & Inputs**: Repository Owner (Anupam Khurana)
-- **Development & Coding**: Built in collaboration with **Antigravity** (Google DeepMind's advanced agentic coding AI assistant)
+- **Concept, Design & Co-Development**: Repository Owner (Anupam Khurana) — contributed original concepts, project structure, design specifications, and co-authored the codebase.
+- **AI Development Assistant**: Developed in partnership with **Antigravity** (Google DeepMind's advanced agentic coding AI assistant) — assisted with code implementation, performance optimization, and repository refactoring.
 
