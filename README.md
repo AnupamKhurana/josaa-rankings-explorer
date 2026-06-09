@@ -81,3 +81,11 @@ An interactive, premium web application designed to analyze, filter, and explore
 To fetch fresh records from the admissions portal, run the scripts inside the `data_sourcing/` folder:
 - **Fetch Seat Matrix**: `python3 data_sourcing/seat_matrix_scraper.py`
 - **Bulk Fetch Ranks**: `python3 data_sourcing/bulk_scraper.py` (Automatically checks for cached rounds and crawls missing ones).
+
+---
+
+## Credits & Contributions
+
+- **Concept & Inputs**: Repository Owner (Anupam Khurana)
+- **Development & Coding**: Built in collaboration with **Antigravity** (Google DeepMind's advanced agentic coding AI assistant)
+
