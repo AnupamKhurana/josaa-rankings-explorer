@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive JoSAA Opening and Closing Rankings Explorer. Filter by ranks, institute, program, seat type, and category.">
+    <title>JoSAA Rankings Explorer</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css?v=20">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation & Filters -->
+        <aside class="sidebar glass" id="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h2>JoSAA Explorer</h2>
+                    <p>Ranks Analytics & Filtering</p>
+                </div>
+            </div>
+            
+            <hr class="divider">
+            
+            <!-- Global Profile & Ranks (Visible on all tabs) -->
+            <div class="sidebar-section user-profile-section">
+                <h3><i class="fa-solid fa-user-graduate"></i> My Profile & Ranks</h3>
+                <div class="user-profile-display">
+                    <div class="profile-display-row">
+                        <span class="profile-display-label">JEE Main CRL:</span>
+                        <span id="display-rank-mains" class="profile-display-value">Not Set</span>
+                    </div>
+                    <div class="profile-display-row">
+                        <span class="profile-display-label">JEE Advanced:</span>
+                        <span id="display-rank-adv" class="profile-display-value">Not Set</span>
+                    </div>
+                    <div class="profile-display-row">
+                        <span class="profile-display-label">Home State:</span>
+                        <span id="display-home-state" class="profile-display-value">All States</span>
+                    </div>
+                </div>
+                <button id="btn-edit-profile" class="btn btn-outline btn-block btn-sm" style="margin-top: 4px;">
+                    <i class="fa-solid fa-user-pen"></i> Edit Profile
+                </button>
+            </div>
+            
+            <hr class="divider">
+            
+            <!-- JoSAA Sidebar Filters -->
+            <div id="rankings-sidebar-filters">
+                <div class="sidebar-section">
+                    <h3><i class="fa-solid fa-database"></i> Source Data</h3>
+                    <div class="source-selectors">
+                        <div class="input-group">
+                            <label for="select-round">Round</label>
+                            <select id="select-round" class="form-control">
+                                <option value="1">Round 1</option>
+                                <option value="2">Round 2</option>
+                                <option value="3">Round 3</option>
+                                <option value="4">Round 4</option>
+                                <option value="5">Round 5</option>
+                                <option value="6" selected>Round 6</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="select-seat-type">Seat Type / Category</label>
+                        <select id="select-seat-type" class="form-control">
+                            <option value="OPNO" selected>OPEN</option>
+                            <option value="OPPH">OPEN (PwD)</option>
+                            <option value="BCNO">OBC-NCL</option>
+                            <option value="BCPH">OBC-NCL (PwD)</option>
+                            <option value="SCNO">SC</option>
+                            <option value="SCPH">SC (PwD)</option>
+                            <option value="STNO">ST</option>
+                            <option value="STPH">ST (PwD)</option>
+                            <option value="EWNO">EWS</option>
+                            <option value="EWPH">EWS (PwD)</option>
+                            <option value="ALL">ALL</option>
+                        </select>
+                    </div>
+                    
+                    <button id="btn-fetch-ranks" class="btn btn-secondary btn-block" style="display: none;">
+                        <i class="fa-solid fa-sync"></i> Refresh / Fetch Data
+                    </button>
+                </div>
+                
+                <hr class="divider">
+                
+                <!-- JoSAA Rank Filtering Options -->
+                <div class="sidebar-section">
+                    <h3><i class="fa-solid fa-sliders"></i> JoSAA Ranks Filtering</h3>
+                    <div class="my-rank-filters">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="chk-filter-mains">
+                            <span class="checkbox-label">Filter NITs/IIITs by Main Rank</span>
+                        </label>
+                        <div id="mains-range-display" class="rank-range-edit-container" style="display: none;">
+                            <label>Mains Min Closing Rank</label>
+                            <input type="number" id="input-mains-min" class="form-control form-control-sm" placeholder="Min">
+                        </div>
+                        
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="chk-filter-adv">
+                            <span class="checkbox-label">Filter IITs by Advanced Rank</span>
+                        </label>
+                        <div id="adv-range-display" class="rank-range-edit-container" style="display: none;">
+                            <label>Advanced Min Closing Rank</label>
+                            <input type="number" id="input-adv-min" class="form-control form-control-sm" placeholder="Min">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="divider">
+                
+                <div class="sidebar-section scrollable-filters">
+                    <h3><i class="fa-solid fa-sliders"></i> Rankings Filter</h3>
+                    
+                    <!-- Quick Search -->
+                    <div class="input-group">
+                        <label for="search-input">Search Text</label>
+                        <div class="search-wrapper">
+                            <input type="text" id="search-input" placeholder="Search institute or branch..." class="form-control pr-icon">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Institute Type Filter -->
+                    <div class="input-group">
+                        <label for="filter-inst-type">Institute Type</label>
+                        <select id="filter-inst-type" class="form-control">
+                            <option value="ALL" selected>All Institute Types</option>
+                            <option value="IIT">IITs</option>
+                            <option value="NIT">NITs</option>
+                            <option value="IIIT">IIITs</option>
+                            <option value="GFTI">GFTIs / Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Quota Filter -->
+                    <div class="input-group">
+                        <label for="filter-quota">Quota</label>
+                        <select id="filter-quota" class="form-control" multiple size="3">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <span class="help-text">Hold Ctrl/Cmd to select multiple</span>
+                    </div>
+                    
+                    <!-- Gender Filter -->
+                    <div class="input-group">
+                        <label for="filter-gender">Gender Pool</label>
+                        <select id="filter-gender" class="form-control">
+                            <option value="ALL">All Pools</option>
+                            <option value="Gender-Neutral" selected>Gender-Neutral Only</option>
+                            <option value="Female-only (including Supernumerary)">Female-only Pool</option>
+                        </select>
+                    </div>
+
+                    <!-- Opening Rank Filter -->
+                    <div class="input-group">
+                        <label>Opening Rank Range</label>
+                        <div class="rank-inputs-grid">
+                            <input type="number" id="input-min-opening" min="1" placeholder="Min" class="form-control">
+                            <span class="range-separator">to</span>
+                            <input type="number" id="input-max-opening" min="1" placeholder="Max" class="form-control">
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="slider-min-opening" min="1" max="100000" value="1" class="slider-single" title="Min Opening Rank">
+                            <input type="range" id="slider-max-opening" min="1" max="100000" value="100000" class="slider-single" title="Max Opening Rank">
+                        </div>
+                    </div>
+
+                    <!-- Closing Rank Filter -->
+                    <div class="input-group">
+                        <label>Closing Rank Range</label>
+                        <div class="rank-inputs-grid">
+                            <input type="number" id="input-min-closing" min="1" placeholder="Min" class="form-control">
+                            <span class="range-separator">to</span>
+                            <input type="number" id="input-max-closing" min="1" placeholder="Max" class="form-control">
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="slider-min-closing" min="1" max="100000" value="1" class="slider-single" title="Min Closing Rank">
+                            <input type="range" id="slider-max-closing" min="1" max="100000" value="100000" class="slider-single" title="Max Closing Rank">
+                        </div>
+                    </div>
+
+                    <!-- Quick Clear Buttons -->
+                    <button id="btn-reset-filters" class="btn btn-outline btn-block">
+                        <i class="fa-solid fa-xmark"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- New Courses Sidebar Filters -->
+            <div id="new-courses-sidebar-filters" style="display: none;">
+                <div class="sidebar-section scrollable-filters">
+                    <h3><i class="fa-solid fa-sliders"></i> New Courses Filters</h3>
+                    
+                    <!-- Search new courses -->
+                    <div class="input-group">
+                        <label for="new-courses-sidebar-search">Search Text</label>
+                        <div class="search-wrapper">
+                            <input type="text" id="new-courses-sidebar-search" placeholder="Search new courses..." class="form-control pr-icon">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Introduction Year -->
+                    <div class="input-group">
+                        <label for="new-courses-sidebar-filter-year">Introduction Year</label>
+                        <select id="new-courses-sidebar-filter-year" class="form-control">
+                            <option value="2026" selected>Intro Year: 2026</option>
+                            <option value="2025">Intro Year: 2025</option>
+                            <option value="2024">Intro Year: 2024</option>
+                            <option value="2023">Intro Year: 2023</option>
+                            <option value="ALL">All Intro Years</option>
+                        </select>
+                    </div>
+
+                    <!-- Institute Type -->
+                    <div class="input-group">
+                        <label for="new-courses-sidebar-filter-inst-type">Institute Type</label>
+                        <select id="new-courses-sidebar-filter-inst-type" class="form-control">
+                            <option value="ALL" selected>All Inst. Types</option>
+                            <option value="IIT">IITs</option>
+                            <option value="NIT">NITs</option>
+                            <option value="IIIT">IIITs</option>
+                            <option value="GFTI">GFTIs / Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Quota -->
+                    <div class="input-group">
+                        <label for="new-courses-sidebar-filter-quota">Quota</label>
+                        <select id="new-courses-sidebar-filter-quota" class="form-control">
+                            <option value="ALL" selected>All Quotas</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Gender Pool -->
+                    <div class="input-group">
+                        <label for="new-courses-sidebar-filter-gender">Gender Pool</label>
+                        <select id="new-courses-sidebar-filter-gender" class="form-control">
+                            <option value="ALL">All Gender Pools</option>
+                            <option value="Gender-Neutral" selected>Gender-Neutral</option>
+                            <option value="Female-only (including Supernumerary)">Female-only</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header/Top Nav -->
+            <header class="top-nav glass">
+                <div class="nav-left">
+                    <button id="btn-toggle-sidebar" class="btn btn-icon d-md-none">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">JoSAA Rankings Explorer</h1>
+                </div>
+                <div class="nav-right">
+                    <div id="data-status-badge" class="badge badge-success">
+                        <i class="fa-solid fa-circle-check"></i> Data Cached
+                    </div>
+                    <button id="btn-toggle-theme" class="btn btn-icon theme-toggle-btn" title="Toggle Theme">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Navigation Tabs -->
+            <div class="navigation-tabs glass">
+                <button class="nav-tab active" data-tab="josaa">
+                    <i class="fa-solid fa-chart-line"></i> Cutoff Rankings Explorer
+                </button>
+                <button class="nav-tab" data-tab="new-courses">
+                    <i class="fa-solid fa-plus-circle"></i> New Courses & Seat Matrix
+                </button>
+            </div>
+            
+            <!-- JoSAA Tab Content -->
+            <div id="tab-content-josaa" class="tab-content active">
+                <div class="content-body">
+                <!-- Stats Dashboard Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card glass">
+                        <div class="stat-icon icon-primary">
+                            <i class="fa-solid fa-university"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h4 id="stat-total-institutes">-</h4>
+                            <p>Institutes</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-icon icon-success">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h4 id="stat-total-programs">-</h4>
+                            <p>Unique Programs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-icon icon-info">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h4 id="stat-opening-min">-</h4>
+                            <p>Best Opening Rank</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-icon icon-warning">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h4 id="stat-total-records">-</h4>
+                            <p>Total Records Listed</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Table View Controls & Filters display -->
+                <div class="table-container-wrapper glass">
+                    <div class="table-toolbar">
+                        <div class="toolbar-left">
+                            <h3>Seat Allocations</h3>
+                            <span id="filtered-records-count" class="records-subtitle">Showing ... records</span>
+                        </div>
+                        <div class="toolbar-right">
+                            <button id="btn-export-csv" class="btn btn-outline btn-sm">
+                                <i class="fa-solid fa-download"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Table -->
+                    <div class="table-scroll">
+                        <table id="ranks-table">
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-sort="institute">Institute <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="program">Academic Program <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="quota">Quota <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="gender">Gender <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="opening_rank">Opening 2025 <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="closing_rank">Closing 2025 <i class="fa-solid fa-sort"></i></th>
+                                    <th>Closing 2024</th>
+                                    <th>Closing 2023</th>
+                                    <th>Closing 2022</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ranks-tbody">
+                                <!-- Dynamic rows loaded here -->
+                            </tbody>
+                        </table>
+                        
+                        <!-- Table Loading Spinner -->
+                        <div id="table-loading-overlay" class="table-overlay d-none">
+                            <div class="spinner"></div>
+                            <p>Loading ranking metrics...</p>
+                        </div>
+                        
+                        <!-- Empty State -->
+                        <div id="table-empty-state" class="table-overlay d-none">
+                            <i class="fa-solid fa-folder-open empty-icon"></i>
+                            <p>No results matches your filtering criteria.</p>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- New Courses Tab Content -->
+            <div id="tab-content-new-courses" class="tab-content">
+                <div class="content-body">
+                    <!-- Search and Stats row -->
+                    <div class="stats-grid" style="margin-top: 20px;">
+                        <div class="stat-card glass">
+                            <div class="stat-icon icon-primary">
+                                <i class="fa-solid fa-plus-circle"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h4 id="stat-new-courses-count">-</h4>
+                                <p>Newly Added Courses</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-icon icon-success">
+                                <i class="fa-solid fa-chair"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h4 id="stat-new-courses-seats">-</h4>
+                                <p>Total New Seats</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New Courses List Table -->
+                    <div class="table-container-wrapper glass" style="margin-top: 20px;">
+                         <div class="table-toolbar" style="flex-direction: column; align-items: stretch; gap: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                                <div class="toolbar-left">
+                                    <h3>New Programs List</h3>
+                                    <span id="new-courses-count" class="records-subtitle">Showing ... new courses</span>
+                                </div>
+                                 <div class="toolbar-right" style="flex-wrap: wrap; gap: 12px; align-items: center;">
+                                     <!-- Filters moved to sidebar -->
+                                 </div>
+                             </div>
+                         </div>
+                        
+                        <div class="table-scroll">
+                            <table id="new-courses-table">
+                                <thead>
+                                    <tr>
+                                        <th class="new-courses-sortable" data-sort="institute" style="cursor: pointer;">Institute <i class="fa-solid fa-sort"></i></th>
+                                        <th class="new-courses-sortable" data-sort="program" style="cursor: pointer;">Academic Program Name <i class="fa-solid fa-sort"></i></th>
+                                        <th class="new-courses-sortable" data-sort="start_year" style="cursor: pointer;">Intro Year <i class="fa-solid fa-sort"></i></th>
+                                        <th class="new-courses-sortable" data-sort="quota" style="cursor: pointer;">Quota <i class="fa-solid fa-sort"></i></th>
+                                        <th class="new-courses-sortable" data-sort="seat_pool" style="cursor: pointer;">Seat Pool <i class="fa-solid fa-sort"></i></th>
+                                        <th class="new-courses-sortable" data-sort="total" style="cursor: pointer;">Total Seats <i class="fa-solid fa-sort"></i></th>
+                                        <th>Seat Breakdowns</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="new-courses-tbody">
+                                    <!-- Dynamic rows loaded here -->
+                                </tbody>
+                            </table>
+                            
+                            <div id="new-courses-loading-overlay" class="table-overlay d-none">
+                                <div class="spinner"></div>
+                                <p>Loading new courses...</p>
+                            </div>
+
+                            <div id="new-courses-empty-state" class="table-overlay d-none">
+                                <i class="fa-solid fa-folder-open empty-icon"></i>
+                                <p>No new courses match your search.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="profile-modal" class="modal-overlay d-none">
+        <div class="modal-card glass">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-user-graduate"></i> Set Your Profile & Ranks</h2>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Enter your JEE ranks and home state. This data is stored locally on your browser and is used to customize and filter matching course options.
+                </p>
+                <div class="source-selectors" style="margin-bottom: 16px;">
+                    <div class="input-group">
+                        <label for="modal-rank-mains">JEE Main CRL</label>
+                        <input type="number" id="modal-rank-mains" placeholder="e.g. 15000" class="form-control">
+                    </div>
+                    <div class="input-group">
+                        <label for="modal-rank-adv">JEE Advanced Rank</label>
+                        <input type="number" id="modal-rank-adv" placeholder="e.g. 4500" class="form-control">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="modal-select-home-state">Home State</label>
+                    <select id="modal-select-home-state" class="form-control">
+                        <option value="ALL">All States / AI Only</option>
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jammu & Kashmir">Jammu & Kashmir</option>
+                        <option value="Jharkhand">Jharkhand</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Ladakh">Ladakh</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="West Bengal">West Bengal</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
+                <button id="btn-cancel-profile" class="btn btn-outline" style="flex: 1;">Cancel</button>
+                <button id="btn-save-profile" class="btn btn-primary" style="flex: 1;">Save Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scrape Loading Modal Overlay -->
+    <div id="scrape-modal" class="modal-overlay d-none">
+        <div class="modal-card glass">
+            <div class="modal-header">
+                <h2>Fetching Fresh JoSAA Rankings</h2>
+            </div>
+            <div class="modal-body">
+                <p>Establishing connection to the JoSAA admissions server...</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="modal-progress-fill"></div>
+                </div>
+                <div class="scrape-steps">
+                    <div class="scrape-step" id="step-0"><i class="fa-solid fa-circle-notch fa-spin"></i> Initializing handshake</div>
+                    <div class="scrape-step text-muted" id="step-1"><i class="fa-solid fa-circle"></i> Selecting academic year</div>
+                    <div class="scrape-step text-muted" id="step-2"><i class="fa-solid fa-circle"></i> Choosing round parameters</div>
+                    <div class="scrape-step text-muted" id="step-3"><i class="fa-solid fa-circle"></i> Querying categories & programs</div>
+                    <div class="scrape-step text-muted" id="step-4"><i class="fa-solid fa-circle"></i> Processing results table</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-cancel-scrape" class="btn btn-outline" disabled>Please wait...</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script -->
+    <script src="app.js?v=20"></script>
+</body>
+</html>

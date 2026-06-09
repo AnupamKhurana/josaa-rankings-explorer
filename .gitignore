@@ -1,0 +1,27 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Databases
+data/*.db
+data/test_recreate.db
+
+# Logs
+*.log
+logs/
+
+# IDE / Project Caches
+.vscode/
+.idea/
+.gemini/
+.DS_Store
