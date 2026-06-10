@@ -39,6 +39,49 @@ def clean_rank(val: str) -> int:
         pass
     return 999999  # Large fallback for sorting/filtering closing ranks
 
+def get_available_years() -> list[str]:
+    """Fetches the JoSAA landing page and returns available years from the select dropdown."""
+    try:
+        res = requests.get(URL, headers=HEADERS, timeout=10)
+        if res.status_code == 200:
+            soup = BeautifulSoup(res.text, 'html.parser')
+            year_select = soup.find('select', {'name': 'ctl00$ContentPlaceHolder1$ddlYear'}) or soup.find('select', id=lambda x: x and 'ddlYear' in x)
+            if year_select:
+                return [opt.get('value') for opt in year_select.find_all('option') if opt.get('value') and opt.get('value') != "0"]
+    except Exception as e:
+        print(f"Error fetching available years: {e}")
+    return ["2025", "2024", "2023", "2022"]  # Fallback
+
+def get_available_rounds_for_year(year: str) -> list[str]:
+    """Simulates selecting a year on the JoSAA page to get its available rounds list."""
+    try:
+        session = requests.Session()
+        res = session.get(URL, headers=HEADERS, timeout=10)
+        if res.status_code == 200:
+            soup = BeautifulSoup(res.text, 'html.parser')
+            h = {
+                '__VIEWSTATE': soup.find('input', {'name': '__VIEWSTATE'}).get('value') if soup.find('input', {'name': '__VIEWSTATE'}) else "",
+                '__VIEWSTATEGENERATOR': soup.find('input', {'name': '__VIEWSTATEGENERATOR'}).get('value') if soup.find('input', {'name': '__VIEWSTATEGENERATOR'}) else "",
+                '__EVENTVALIDATION': soup.find('input', {'name': '__EVENTVALIDATION'}).get('value') if soup.find('input', {'name': '__EVENTVALIDATION'}) else "",
+                'ctl00$hdnSecKey': soup.find('input', {'name': 'ctl00$hdnSecKey'}).get('value') if soup.find('input', {'name': 'ctl00$hdnSecKey'}) else "",
+            }
+            data = {
+                **h,
+                "__EVENTTARGET": 'ctl00$ContentPlaceHolder1$ddlYear',
+                "__EVENTARGUMENT": "",
+                'ctl00$ContentPlaceHolder1$ddlYear': year
+            }
+            res2 = session.post(URL, headers=HEADERS, data=data, timeout=10)
+            if res2.status_code == 200:
+                soup2 = BeautifulSoup(res2.text, 'html.parser')
+                round_select = soup2.find('select', {'name': 'ctl00$ContentPlaceHolder1$ddlroundno'}) or soup2.find('select', id=lambda x: x and 'ddlroundno' in x)
+                if round_select:
+                    return [opt.get('value') for opt in round_select.find_all('option') if opt.get('value') and opt.get('value') != "0"]
+    except Exception as e:
+        print(f"Error fetching available rounds for year {year}: {e}")
+    # Fallback
+    return ["1", "2", "3", "4", "5"] if year == "2024" else ["1", "2", "3", "4", "5", "6"]
+
 def scrape_josaa_ranks(year: str = "2025", round_no: str = "6", seat_type: str = "OPNO") -> list[dict]:
     """
     Simulates the sequence of POST requests (postbacks) on the JoSAA archive page

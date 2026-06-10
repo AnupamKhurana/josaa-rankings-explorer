@@ -56,6 +56,22 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def get_exam_type(institute_name: str) -> str:
+    inst_lower = institute_name.lower()
+    if 'indian institute  of technology' in inst_lower or 'indian institute of technology' in inst_lower or 'indian institute of science' in inst_lower or 'iisc' in inst_lower:
+        return 'JEE-Advanced'
+    return 'JEE-Main'
+
+def ensure_institute_registered(cursor, institute_name: str):
+    cursor.execute("SELECT 1 FROM josaa_institutes WHERE institute = ?", (institute_name,))
+    if not cursor.fetchone():
+        state = get_institute_state(institute_name)
+        exam_type = get_exam_type(institute_name)
+        cursor.execute(
+            "INSERT OR IGNORE INTO josaa_institutes (institute, state, exam_type) VALUES (?, ?, ?)",
+            (institute_name, state, exam_type)
+        )
+
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -85,6 +101,7 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS josaa_seat_matrix (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        year TEXT DEFAULT '2026',
         institute TEXT,
         program TEXT,
         quota TEXT,
@@ -105,23 +122,69 @@ def init_db():
         institute_state TEXT
     )
     """)
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_seat_matrix ON josaa_seat_matrix (institute, program)")
+    # Migration for year column in josaa_seat_matrix if table existed before
+    cursor.execute("PRAGMA table_info(josaa_seat_matrix)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if 'year' not in columns:
+        cursor.execute("ALTER TABLE josaa_seat_matrix ADD COLUMN year TEXT DEFAULT '2026'")
     
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_seat_matrix ON josaa_seat_matrix (institute, program)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_seat_matrix_year ON josaa_seat_matrix (year)")
+    
+    # Create Registries
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS josaa_institutes (
+        institute TEXT PRIMARY KEY,
+        state TEXT,
+        exam_type TEXT
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS josaa_special_quotas (
+        quota TEXT PRIMARY KEY,
+        state TEXT
+    )
+    """)
+
+    # Seed Special Quotas
+    cursor.execute("SELECT COUNT(*) FROM josaa_special_quotas")
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany(
+            "INSERT INTO josaa_special_quotas (quota, state) VALUES (?, ?)",
+            [('GO', 'Goa'), ('JK', 'Jammu & Kashmir'), ('LA', 'Ladakh')]
+        )
+
+    # Seed Institutes Registry
+    cursor.execute("SELECT COUNT(*) FROM josaa_institutes")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("SELECT DISTINCT institute FROM josaa_ranks UNION SELECT DISTINCT institute FROM josaa_seat_matrix")
+        unique_institutes = [r[0] for r in cursor.fetchall() if r[0]]
+        for inst in unique_institutes:
+            state = get_institute_state(inst)
+            exam_type = get_exam_type(inst)
+            cursor.execute(
+                "INSERT OR IGNORE INTO josaa_institutes (institute, state, exam_type) VALUES (?, ?, ?)",
+                (inst, state, exam_type)
+            )
+
     conn.commit()
     conn.close()
 
-def insert_seat_matrix(records: list[dict]):
+def insert_seat_matrix(records: list[dict], year: str = "2026"):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Clear existing seat matrix to avoid duplicates
-    cursor.execute("DELETE FROM josaa_seat_matrix")
+    # Clear existing seat matrix to avoid duplicates for the specific year
+    cursor.execute("DELETE FROM josaa_seat_matrix WHERE year = ?", (year,))
     
     data_to_insert = []
     for r in records:
         inst_name = r.get("institute", "")
+        ensure_institute_registered(cursor, inst_name)
         seats = r.get("seats", {})
         data_to_insert.append((
+            year,
             inst_name,
             r.get("program", ""),
             r.get("quota", ""),
@@ -144,16 +207,16 @@ def insert_seat_matrix(records: list[dict]):
         
     cursor.executemany("""
     INSERT INTO josaa_seat_matrix (
-        institute, program, quota, seat_pool, 
+        year, institute, program, quota, seat_pool, 
         open, open_pwd, gen_ews, gen_ews_pwd, 
         sc, sc_pwd, st, st_pwd, obc_ncl, obc_ncl_pwd, 
         total, program_total, female_supernumerary, institute_state
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, data_to_insert)
     
     conn.commit()
     conn.close()
-    print(f"Stored {len(records)} seat matrix records in DB")
+    print(f"Stored {len(records)} seat matrix records in DB for year {year}")
 
 def has_dataset(year: str, round_no: str, seat_type: str) -> bool:
     conn = get_db_connection()
@@ -179,6 +242,7 @@ def insert_ranks(year: str, round_no: str, seat_type: str, ranks: list[dict]):
     data_to_insert = []
     for r in ranks:
         inst_name = r.get("institute", "")
+        ensure_institute_registered(cursor, inst_name)
         data_to_insert.append((
             str(year),
             str(round_no),

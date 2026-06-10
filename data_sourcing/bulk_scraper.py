@@ -5,30 +5,30 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import time
 import random
 from db import init_db, has_dataset
-from data_sourcing.scraper import scrape_josaa_ranks
+from data_sourcing.scraper import scrape_josaa_ranks, get_available_years, get_available_rounds_for_year
 
 # Parameters to scrape
-YEARS = ["2025", "2024", "2023", "2022"]
-ROUNDS = ["1", "2", "3", "4", "5", "6"]
 SEAT_TYPES = ["ALL"]
 
 def run_bulk_scrape():
     init_db()
 
+    print("Fetching active years from JoSAA portal...")
+    discovered_years = get_available_years()
+    print(f"Discovered Years: {discovered_years}")
+
     print("Starting Bulk Scraper for past JoSAA Ranking Data...")
-    print(f"Targeting: Years: {YEARS}, Rounds: {ROUNDS}, Categories: {SEAT_TYPES}")
+    print(f"Targeting discovered years and their respective available rounds.")
 
     success_count = 0
     skip_count = 0
     error_count = 0
 
-    for year in YEARS:
-        # 2024 only had 5 rounds of seat allocation, while 2025 had 6
-        max_rounds = 5 if year == "2024" else 6
+    for year in discovered_years:
+        rounds_for_year = get_available_rounds_for_year(year)
+        print(f"Discovered Rounds for Year {year}: {rounds_for_year}")
 
-        for round_no in ROUNDS:
-            if int(round_no) > max_rounds:
-                continue
+        for round_no in rounds_for_year:
 
             for seat_type in SEAT_TYPES:
                 # Check if database already has this combination

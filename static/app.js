@@ -577,6 +577,7 @@ function renderTable(ranks, roundsUsed) {
         const row = document.createElement('tr');
         
         const nirfBadge = r.nirf_rank ? `<span class="badge badge-nirf" style="margin-left: 6px; font-size: 10px; padding: 2px 6px; background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;"><i class="fa-solid fa-trophy" style="font-size: 8px;"></i> NIRF #${r.nirf_rank}</span>` : '';
+        const iirfBadge = r.iirf_rank ? `<span class="badge badge-iirf" style="margin-left: 6px; font-size: 10px; padding: 2px 6px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;"><i class="fa-solid fa-medal" style="font-size: 8px;"></i> IIRF #${r.iirf_rank}</span>` : '';
         
         // Helper to format rank with round info
         const formatRankCell = (rankVal, year) => {
@@ -588,7 +589,7 @@ function renderTable(ranks, roundsUsed) {
         };
 
         row.innerHTML = `
-            <td>${r.institute}${nirfBadge}</td>
+            <td>${r.institute}${nirfBadge}${iirfBadge}</td>
             <td>${r.program}</td>
             <td><span class="badge badge-outline">${r.quota}</span></td>
             <td>${r.gender}</td>
@@ -1131,7 +1132,7 @@ function renderNewCoursesTable() {
         // Introduction Year filter
         let matchesYear = true;
         if (newCoursesState.year !== "ALL") {
-            matchesYear = c.start_year === parseInt(newCoursesState.year);
+            matchesYear = parseInt(c.start_year) === parseInt(newCoursesState.year);
         }
         
         return matchesSearch && matchesQuota && matchesGender && matchesInstType && matchesYear;

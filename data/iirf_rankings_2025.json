@@ -1,0 +1,425 @@
+[
+  {
+    "inst_id": "IIRF-E-G-0001",
+    "name": "Indian Institute of Technology Bombay",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "score": "95.42",
+    "rank": "1",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0002",
+    "name": "Indian Institute of Technology Delhi",
+    "city": "New Delhi",
+    "state": "Delhi",
+    "score": "94.85",
+    "rank": "2",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0003",
+    "name": "Indian Institute of Technology Madras",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "score": "93.75",
+    "rank": "3",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0004",
+    "name": "Indian Institute of Technology Kharagpur",
+    "city": "Kharagpur",
+    "state": "West Bengal",
+    "score": "91.80",
+    "rank": "4",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0005",
+    "name": "Indian Institute of Technology Kanpur",
+    "city": "Kanpur",
+    "state": "Uttar Pradesh",
+    "score": "90.20",
+    "rank": "5",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0006",
+    "name": "Indian Institute of Technology Guwahati",
+    "city": "Guwahati",
+    "state": "Assam",
+    "score": "88.92",
+    "rank": "6",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0007",
+    "name": "National Institute of Technology, Tiruchirappalli",
+    "city": "Tiruchirappalli",
+    "state": "Tamil Nadu",
+    "score": "86.42",
+    "rank": "7",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-P-0001",
+    "name": "Birla Institute of Technology and Science, Pilani",
+    "city": "Pilani",
+    "state": "Rajasthan",
+    "score": "86.10",
+    "rank": "1",
+    "category": "Private"
+  },
+  {
+    "inst_id": "IIRF-E-G-0008",
+    "name": "Indian Institute of Technology Roorkee",
+    "city": "Roorkee",
+    "state": "Uttarakhand",
+    "score": "85.44",
+    "rank": "8",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0009",
+    "name": "Indian Institute of Technology Hyderabad",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "score": "84.22",
+    "rank": "9",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0010",
+    "name": "Indian Institute of Technology (BHU) Varanasi",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "score": "83.15",
+    "rank": "10",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-P-0002",
+    "name": "Vellore Institute of Technology",
+    "city": "Vellore",
+    "state": "Tamil Nadu",
+    "score": "82.90",
+    "rank": "2",
+    "category": "Private"
+  },
+  {
+    "inst_id": "IIRF-E-G-0011",
+    "name": "Indian Institute of Technology Indore",
+    "city": "Indore",
+    "state": "Madhya Pradesh",
+    "score": "82.50",
+    "rank": "11",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0012",
+    "name": "National Institute of Technology Karnataka, Surathkal",
+    "city": "Surathkal",
+    "state": "Karnataka",
+    "score": "81.44",
+    "rank": "12",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0013",
+    "name": "Indian Institute of Technology Gandhinagar",
+    "city": "Gandhinagar",
+    "state": "Gujarat",
+    "score": "80.60",
+    "rank": "12",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0014",
+    "name": "National Institute of Technology, Rourkela",
+    "city": "Rourkela",
+    "state": "Odisha",
+    "score": "79.22",
+    "rank": "14",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0015",
+    "name": "National Institute of Technology, Warangal",
+    "city": "Warangal",
+    "state": "Telangana",
+    "score": "78.50",
+    "rank": "13",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0016",
+    "name": "National Institute of Technology Calicut",
+    "city": "Kozhikode",
+    "state": "Kerala",
+    "score": "78.10",
+    "rank": "15",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-P-0003",
+    "name": "SRM Institute of Science and Technology",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "score": "77.80",
+    "rank": "3",
+    "category": "Private"
+  },
+  {
+    "inst_id": "IIRF-E-G-0017",
+    "name": "Indian Institute of Technology Patna",
+    "city": "Patna",
+    "state": "Bihar",
+    "score": "77.10",
+    "rank": "16",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0018",
+    "name": "Indian Institute of Technology Jodhpur",
+    "city": "Jodhpur",
+    "state": "Rajasthan",
+    "score": "76.80",
+    "rank": "14",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0019",
+    "name": "Indian Institute of Technology Ropar",
+    "city": "Rupnagar",
+    "state": "Punjab",
+    "score": "76.50",
+    "rank": "13",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0020",
+    "name": "Indian Institute of Technology Mandi",
+    "city": "Mandi",
+    "state": "Himachal Pradesh",
+    "score": "75.90",
+    "rank": "15",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-P-0004",
+    "name": "Thapar Institute of Engineering and Technology",
+    "city": "Patiala",
+    "state": "Punjab",
+    "score": "75.30",
+    "rank": "4",
+    "category": "Private"
+  },
+  {
+    "inst_id": "IIRF-E-G-0021",
+    "name": "Indian Institute of Technology (Indian School of Mines) Dhanbad",
+    "city": "Dhanbad",
+    "state": "Jharkhand",
+    "score": "74.80",
+    "rank": "17",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0022",
+    "name": "Indian Institute of Technology Bhubaneswar",
+    "city": "Bhubaneswar",
+    "state": "Odisha",
+    "score": "74.10",
+    "rank": "18",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0023",
+    "name": "Indian Institute of Information Technology, Allahabad",
+    "city": "Allahabad",
+    "state": "Uttar Pradesh",
+    "score": "73.90",
+    "rank": "16",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0024",
+    "name": "Visvesvaraya National Institute of Technology, Nagpur",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "score": "73.20",
+    "rank": "19",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0025",
+    "name": "Malaviya National Institute of Technology Jaipur",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "score": "72.80",
+    "rank": "20",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-P-0005",
+    "name": "Manipal Institute of Technology",
+    "city": "Manipal",
+    "state": "Karnataka",
+    "score": "72.10",
+    "rank": "5",
+    "category": "Private"
+  },
+  {
+    "inst_id": "IIRF-E-G-0026",
+    "name": "National Institute of Technology Durgapur",
+    "city": "Durgapur",
+    "state": "West Bengal",
+    "score": "71.50",
+    "rank": "22",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0027",
+    "name": "Motilal Nehru National Institute of Technology Allahabad",
+    "city": "Prayagraj",
+    "state": "Uttar Pradesh",
+    "score": "71.10",
+    "rank": "18",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0028",
+    "name": "Indian Institute of Technology, Tirupati",
+    "city": "Tirupati",
+    "state": "Andhra Pradesh",
+    "score": "70.80",
+    "rank": "20",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0029",
+    "name": "Indian Institute of Technology Palakkad",
+    "city": "Palakkad",
+    "state": "Kerala",
+    "score": "70.20",
+    "rank": "21",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0030",
+    "name": "Dr. B R Ambedkar National Institute of Technology, Jalandhar",
+    "city": "Jalandhar",
+    "state": "Punjab",
+    "score": "69.80",
+    "rank": "23",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0031",
+    "name": "Indian Institute of Technology Jammu",
+    "city": "Jammu",
+    "state": "Jammu and Kashmir",
+    "score": "69.10",
+    "rank": "23",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0032",
+    "name": "National Institute of Technology, Kurukshetra",
+    "city": "Kurukshetra",
+    "state": "Haryana",
+    "score": "68.50",
+    "rank": "24",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0033",
+    "name": "National Institute of Technology Delhi",
+    "city": "Delhi",
+    "state": "Delhi",
+    "score": "68.10",
+    "rank": "25",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0034",
+    "name": "Indian Institute of Information Technology Lucknow",
+    "city": "Lucknow",
+    "state": "Uttar Pradesh",
+    "score": "67.80",
+    "rank": "23",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0035",
+    "name": "Atal Bihari Vajpayee Indian Institute of Information Technology & Management Gwalior",
+    "city": "Gwalior",
+    "state": "Madhya Pradesh",
+    "score": "67.50",
+    "rank": "21",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0036",
+    "name": "Indian Institute of Technology Bhilai",
+    "city": "Durg",
+    "state": "Chhattisgarh",
+    "score": "66.90",
+    "rank": "24",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0037",
+    "name": "Indian Institute of Technology Dharwad",
+    "city": "Dharwad",
+    "state": "Karnataka",
+    "score": "65.80",
+    "rank": "25",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0038",
+    "name": "National Institute of Technology, Jamshedpur",
+    "city": "Jamshedpur",
+    "state": "Jharkhand",
+    "score": "65.10",
+    "rank": "27",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0039",
+    "name": "Indian Institute of Technology Goa",
+    "city": "Goa",
+    "state": "Goa",
+    "score": "64.80",
+    "rank": "26",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0040",
+    "name": "National Institute of Technology Silchar",
+    "city": "Silchar",
+    "state": "Assam",
+    "score": "64.20",
+    "rank": "26",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0041",
+    "name": "National Institute of Technology Hamirpur",
+    "city": "Hamirpur",
+    "state": "Himachal Pradesh",
+    "score": "63.50",
+    "rank": "28",
+    "category": "Government"
+  },
+  {
+    "inst_id": "IIRF-E-G-0042",
+    "name": "Indian Institute of Information Technology, Design & Manufacturing, Jabalpur",
+    "city": "Jabalpur",
+    "state": "Madhya Pradesh",
+    "score": "61.20",
+    "rank": "25",
+    "category": "Government"
+  }
+]

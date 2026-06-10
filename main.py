@@ -22,6 +22,11 @@ nirf_map = {}
 nirf_data = []
 institute_nirf_cache = {}
 
+# IIRF rankings global data
+iirf_map = {}
+iirf_data = []
+institute_iirf_cache = {}
+
 def init_nirf_data():
     global nirf_map, nirf_data
     nirf_path = os.path.join(BASE_DIR, "data", "nirf_rankings_2025.json")
@@ -40,8 +45,27 @@ def init_nirf_data():
         except Exception as e:
             print(f"Error loading NIRF: {e}")
 
+def init_iirf_data():
+    global iirf_map, iirf_data
+    iirf_path = os.path.join(BASE_DIR, "data", "iirf_rankings_2025.json")
+    if os.path.exists(iirf_path):
+        try:
+            with open(iirf_path, "r", encoding="utf-8") as f:
+                iirf_data = json.load(f)
+            # Build normalized map
+            def normalize(name):
+                name = name.lower()
+                name = re.sub(r'[^\w\s]', ' ', name)
+                name = re.sub(r'\s+', ' ', name).strip()
+                return name
+            iirf_map = {normalize(item["name"]): item["rank"] for item in iirf_data}
+            print(f"Loaded {len(iirf_data)} IIRF rankings.")
+        except Exception as e:
+            print(f"Error loading IIRF: {e}")
+
 # Call init on startup
 init_nirf_data()
+init_iirf_data()
 
 # Init SQLite DB and import any existing caches/data
 init_db()
@@ -195,7 +219,111 @@ def precompute_nirf_ranks():
         get_nirf_rank(inst)
     print(f"Precomputed NIRF ranks for {len(institutes)} institutes.")
 
+def get_iirf_rank(institute_name):
+    global iirf_map, iirf_data, institute_iirf_cache
+    if not iirf_map:
+        return None
+    if institute_name in institute_iirf_cache:
+        return institute_iirf_cache[institute_name]
+        
+    def normalize(name):
+        name = name.lower()
+        name = re.sub(r'[^\w\s]', ' ', name)
+        name = re.sub(r'\s+', ' ', name).strip()
+        return name
+        
+    def get_type(norm_name):
+        if 'information technology' in norm_name or 'iiit' in norm_name:
+            return 'iiit'
+        if 'technology' in norm_name and ('indian institute' in norm_name or 'iit' in norm_name):
+            if 'handloom' in norm_name or 'carpet' in norm_name:
+                return 'other'
+            return 'iit'
+        if 'national institute' in norm_name and 'technology' in norm_name:
+            return 'nit'
+        return 'other'
+        
+    j_norm = normalize(institute_name)
+    j_type = get_type(j_norm)
+    best_match = None
+    
+    # Heuristic 1: Exact normalization match
+    for n_item in iirf_data:
+        n_norm = normalize(n_item['name'])
+        if j_norm == n_norm:
+            best_match = n_item
+            break
+            
+    # Heuristic 2: For IIT/NIT/IIIT, match by city
+    if not best_match and j_type in ['iit', 'nit', 'iiit']:
+        j_words = set(j_norm.split())
+        for n_item in iirf_data:
+            n_norm = normalize(n_item['name'])
+            n_type = get_type(n_norm)
+            if j_type == n_type:
+                n_words = set(n_norm.split())
+                cities = {
+                    'madras', 'chennai', 'delhi', 'bombay', 'mumbai', 'kanpur', 'kharagpur', 'roorkee', 
+                    'hyderabad', 'guwahati', 'varanasi', 'bhu', 'dhanbad', 'ism', 'ropar', 'bhubaneswar', 
+                    'gandhinagar', 'patna', 'indore', 'mandi', 'jodhpur', 'tirupati', 'palakkad', 'bhilai', 
+                    'dharwad', 'jammu', 'goa', 'tiruchirappalli', 'trichy', 'surathkal', 'karnataka', 
+                    'warangal', 'calicut', 'kozhikode', 'rourkela', 'kurukshetra', 'allahabad', 'mmnit', 
+                    'nagpur', 'vnit', 'silchar', 'durgapur', 'hamirpur', 'jalandhar', 'meghalaya', 'raipur', 
+                    'srinagar', 'jamshedpur', 'agartala', 'manipur', 'mizoram', 'nagaland', 'puducherry', 
+                    'sikkim', 'uttarakhand', 'andhra', 'gwalior', 'jabalpur', 'kancheepuram', 'kurnool', 
+                    'kota', 'sri', 'city', 'vadodara', 'pune', 'surat', 'bhopal', 'bhagalpur', 'kalyani', 
+                    'una', 'sonepat', 'kottayam', 'ranchi'
+                }
+                shared = j_words.intersection(n_words).intersection(cities)
+                if shared:
+                    best_match = n_item
+                    break
+                    
+    # Heuristic 3: Fuzzy match ONLY for 'other' types, with strict safeguards
+    if not best_match and j_type == 'other':
+        import difflib
+        best_score = 0
+        for n_item in iirf_data:
+            n_norm = normalize(n_item['name'])
+            n_type = get_type(n_norm)
+            
+            if n_type != 'other':
+                continue
+                
+            score = difflib.SequenceMatcher(None, j_norm, n_norm).ratio()
+            if score > best_score:
+                best_score = score
+                best_match = n_item
+                
+        # Only accept very high similarity
+        if best_score < 0.85:
+            best_match = None
+        elif 'birla' in j_norm and 'mesra' not in j_norm:
+            best_match = None
+            
+    if best_match:
+        try:
+            rank = int(best_match['rank'])
+            institute_iirf_cache[institute_name] = rank
+            return rank
+        except:
+            pass
+            
+    institute_iirf_cache[institute_name] = None
+    return None
+
+def precompute_iirf_ranks():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT institute FROM josaa_ranks")
+    institutes = [r[0] for r in cursor.fetchall()]
+    conn.close()
+    for inst in institutes:
+        get_iirf_rank(inst)
+    print(f"Precomputed IIRF ranks for {len(institutes)} institutes.")
+
 precompute_nirf_ranks()
+precompute_iirf_ranks()
 
 class ScrapeRequest(BaseModel):
     year: str = "2025"
@@ -342,33 +470,35 @@ def get_ranks(
     cursor = conn.cursor()
     
     base_query = """
-        SELECT institute, program, quota, seat_type, gender, 
-               MAX(CASE WHEN year = '2025' THEN opening_rank END) AS opening_2025,
-               MAX(CASE WHEN year = '2025' THEN closing_rank END) AS closing_2025,
-               MAX(CASE WHEN year = '2024' THEN closing_rank END) AS closing_2024,
-               MAX(CASE WHEN year = '2023' THEN closing_rank END) AS closing_2023,
-               MAX(CASE WHEN year = '2022' THEN closing_rank END) AS closing_2022,
-               MAX(CASE WHEN year = '2025' THEN opening_rank_str END) AS opening_2025_str,
-               MAX(CASE WHEN year = '2025' THEN closing_rank_str END) AS closing_2025_str,
-               MAX(CASE WHEN year = '2024' THEN closing_rank_str END) AS closing_2024_str,
-               MAX(CASE WHEN year = '2023' THEN closing_rank_str END) AS closing_2023_str,
-               MAX(CASE WHEN year = '2022' THEN closing_rank_str END) AS closing_2022_str,
-               institute_state
-        FROM josaa_ranks 
-        WHERE seat_type = ? AND (
-            (year = '2025' AND round = ?) OR
-            (year = '2024' AND round = ?) OR
-            (year = '2023' AND round = ?) OR
-            (year = '2022' AND round = ?)
+        SELECT r.institute, r.program, r.quota, r.seat_type, r.gender, 
+               MAX(CASE WHEN r.year = '2025' THEN r.opening_rank END) AS opening_2025,
+               MAX(CASE WHEN r.year = '2025' THEN r.closing_rank END) AS closing_2025,
+               MAX(CASE WHEN r.year = '2024' THEN r.closing_rank END) AS closing_2024,
+               MAX(CASE WHEN r.year = '2023' THEN r.closing_rank END) AS closing_2023,
+               MAX(CASE WHEN r.year = '2022' THEN r.closing_rank END) AS closing_2022,
+               MAX(CASE WHEN r.year = '2025' THEN r.opening_rank_str END) AS opening_2025_str,
+               MAX(CASE WHEN r.year = '2025' THEN r.closing_rank_str END) AS closing_2025_str,
+               MAX(CASE WHEN r.year = '2024' THEN r.closing_rank_str END) AS closing_2024_str,
+               MAX(CASE WHEN r.year = '2023' THEN r.closing_rank_str END) AS closing_2023_str,
+               MAX(CASE WHEN r.year = '2022' THEN r.closing_rank_str END) AS closing_2022_str,
+               i.state AS institute_state,
+               i.exam_type
+        FROM josaa_ranks r
+        LEFT JOIN josaa_institutes i ON r.institute = i.institute
+        WHERE r.seat_type = ? AND (
+            (r.year = '2025' AND r.round = ?) OR
+            (r.year = '2024' AND r.round = ?) OR
+            (r.year = '2023' AND r.round = ?) OR
+            (r.year = '2022' AND r.round = ?)
         )
-        GROUP BY institute, program, quota, seat_type, gender, institute_state
+        GROUP BY r.institute, r.program, r.quota, r.seat_type, r.gender, i.state, i.exam_type
     """
     
     query = f"""
         SELECT institute, program, quota, seat_type, gender,
                opening_2025, closing_2025, closing_2024, closing_2023, closing_2022,
                opening_2025_str, closing_2025_str, closing_2024_str, closing_2023_str, closing_2022_str,
-               institute_state,
+               institute_state, exam_type,
                COALESCE(opening_2025, 999999) AS opening_rank,
                COALESCE(closing_2025, closing_2024, closing_2023, closing_2022, 999999) AS closing_rank
         FROM ({base_query})
@@ -414,24 +544,24 @@ def get_ranks(
         )"""
         params.extend([home_state, home_state])
         
-        query += """ AND NOT (quota = 'GO' AND ? != 'Goa') """
-        query += """ AND NOT (quota = 'JK' AND ? != 'Jammu & Kashmir') """
-        query += """ AND NOT (quota = 'LA' AND ? != 'Ladakh') """
-        params.extend([home_state, home_state, home_state])
+        # Query special quotas dynamically from DB
+        cursor.execute("SELECT quota, state FROM josaa_special_quotas")
+        special_quotas = cursor.fetchall()
+        for sq_quota, sq_state in special_quotas:
+            query += f" AND NOT (quota = '{sq_quota}' AND ? != '{sq_state}')"
+            params.append(home_state)
         
-    iit_condition = "(LOWER(institute) LIKE '%indian institute  of technology%' OR LOWER(institute) LIKE '%indian institute of technology%' OR LOWER(institute) LIKE '%indian institute of science%' OR LOWER(institute) LIKE '%iisc%')"
-    
     if filter_mains and filter_adv:
-        query += f""" AND (
-            ({iit_condition} AND closing_rank >= ?) OR 
-            (NOT {iit_condition} AND closing_rank >= ?)
+        query += """ AND (
+            (exam_type = 'JEE-Advanced' AND closing_rank >= ?) OR 
+            (exam_type != 'JEE-Advanced' AND closing_rank >= ?)
         )"""
         params.extend([adv_min or 1, mains_min or 1])
     elif filter_mains:
-        query += f" AND NOT {iit_condition} AND closing_rank >= ?"
+        query += " AND exam_type != 'JEE-Advanced' AND closing_rank >= ?"
         params.extend([mains_min or 1])
     elif filter_adv:
-        query += f" AND {iit_condition} AND closing_rank >= ?"
+        query += " AND exam_type = 'JEE-Advanced' AND closing_rank >= ?"
         params.extend([adv_min or 1])
     else:
         if min_closing is not None:
@@ -473,6 +603,7 @@ def get_ranks(
     
     for r in ranks_list:
         r["nirf_rank"] = get_nirf_rank(r["institute"])
+        r["iirf_rank"] = get_iirf_rank(r["institute"])
         
     stats_query = f"""
         SELECT MIN(opening_rank), MAX(opening_rank), MIN(closing_rank), MAX(closing_rank)
@@ -520,7 +651,7 @@ def get_new_courses():
     cursor = conn.cursor()
     
     # Fetch all seat matrix courses (these are the active ones)
-    cursor.execute("SELECT DISTINCT institute, program, quota, seat_pool, open, open_pwd, gen_ews, gen_ews_pwd, sc, sc_pwd, st, st_pwd, obc_ncl, obc_ncl_pwd, total, program_total, female_supernumerary, institute_state FROM josaa_seat_matrix")
+    cursor.execute("SELECT DISTINCT institute, program, quota, seat_pool, open, open_pwd, gen_ews, gen_ews_pwd, sc, sc_pwd, st, st_pwd, obc_ncl, obc_ncl_pwd, total, program_total, female_supernumerary, institute_state FROM josaa_seat_matrix WHERE year = (SELECT MAX(year) FROM josaa_seat_matrix)")
     seat_rows = cursor.fetchall()
     
     # Fetch all historic ranking courses with their first cutoff year
@@ -603,7 +734,7 @@ def get_new_courses():
             start_year = 2026
         else:
             # Start year is the year it first appeared in rankings
-            start_year = first_year
+            start_year = int(first_year)
             
         new_courses.append({
             "institute": r['institute'],
@@ -634,7 +765,7 @@ def get_new_courses():
     for key, first_year in historic_first_years.items():
         if key not in active_keys:
             inst_orig, prog_orig = original_names[key]
-            start_year = first_year
+            start_year = int(first_year)
             
             # Since they are discontinued, they are not in the seat matrix and have no quota/seat pool records there.
             # We can classify them as inactive/discontinued and set seats to 0.

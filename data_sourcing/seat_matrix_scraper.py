@@ -162,7 +162,9 @@ def scrape_seat_matrix():
     print(f"Saved JSON backup to {json_path}")
     
     # Save to SQLite DB
-    insert_seat_matrix(records)
+    import datetime
+    current_year = str(datetime.datetime.now().year)
+    insert_seat_matrix(records, current_year)
     print("Scraping and download completed successfully!")
 
 if __name__ == "__main__":
