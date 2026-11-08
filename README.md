@@ -1,87 +1,101 @@
-# JoSAA Rankings Explorer
+# 🎓 JoSAA Rankings Explorer & Seat Matrix Analyzer
 
-> **App Root Folder:** `/mnt/1fc0b605-b95c-4190-ba0a-ae87f22cc120/development/josaa`
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org)
+[![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-
-An interactive, premium web application designed to analyze, filter, and explore JoSAA (Joint Seat Allocation Authority) opening and closing ranks cutoffs, alongside active seat matrix distributions and newly introduced engineering courses.
-
-## Features
-
-- **Cutoff Rankings Explorer**: Browse multi-year (2022–2025) opening and closing ranks with detailed filter controls (Institute Type, Quota, Gender Pool, and custom CRL thresholds).
-- **New Courses & Capacity Tracker**: Analyze newly introduced engineering courses (starting from 2023–2026), excluding baseline courses ($year \le 2022$). Inspect category seat breakdowns (OPEN, EWS, OBC-NCL, SC, ST) and female supernumerary capacities.
-- **Interactive First-Time Setup**: Prompts users with a clean modal dialog to enter their JEE ranks and Home State on first startup. The profile displays dynamically in the sidebar with an option to edit/update via popup.
-- **Performance Optimized Backend**:
-  - Precomputes NIRF rankings for all 132 unique colleges at startup, replacing runtime fuzzy matching.
-  - SQLite indexes on `(institute, program, year)` and `(seat_type, year, round)` for sub-millisecond query execution.
-  - Automatically parses and splits master `ALL.json` files on database initialization to minimize storage footprint.
-- **Data Sourcing Utilities**: Features standalone scraping tools to fetch historical cutoff ranks and seat matrices directly from the official JoSAA admissions portal.
+An interactive, high-performance web analytics application designed to analyze, filter, and explore **JoSAA (Joint Seat Allocation Authority)** opening and closing rank cutoffs (2022–2025), NIRF rankings, and active seat matrix distributions across all **IITs, NITs, IIITs, and GFTIs**.
 
 ---
 
-## Tech Stack
+## ⚡ Highlights & Key Features
 
-- **Backend**: FastAPI (Python 3.10+), SQLite
-- **Frontend**: HTML5, Vanilla CSS3 (Glassmorphism & tailored HSL accents), Vanilla Javascript (ES6+)
-- **Libraries**: BeautifulSoup4, Requests, Uvicorn, Pandas
+- 🔍 **Multi-Year Cutoff Rankings Explorer**: Query opening and closing ranks across admission cycles (2022–2025) with filters for Institute Type (IIT, NIT, IIIT, GFTI), Quota (Home State vs. Other State), Category (OPEN, EWS, OBC-NCL, SC, ST), Gender Pool (Female-only supernumerary), and custom CRL thresholds.
+- 📈 **New Courses & Capacity Tracker**: Track newly launched branch additions and emergent engineering streams across IITs/NITs with detailed category seat splits.
+- 🎯 **JEE Rank & State Profile Matching**: Personalized setup modal saves candidate JEE Advanced/Main ranks and home state to dynamically highlight eligible college branches and closing rank safety margins.
+- ⚡ **Optimized Performance Architecture**:
+  - Precomputes NIRF rankings across all 132 engineering colleges at boot to bypass fuzzy matching overhead.
+  - Multi-column composite SQLite indexes on `(institute, program, year)` and `(seat_type, year, round)` for sub-millisecond query execution.
+  - Efficient JSON streaming parsers that minimize database size and memory footprint.
+- 🕷️ **Automated Data Sourcing Crawlers**: Includes standalone multi-threaded scraping tools to fetch official rounds, seat quotas, and closing ranks directly from JoSAA admissions portals.
 
 ---
 
-## Directory Structure
+## 🏗️ Architecture & Tech Stack
 
-```
-.
+| Layer | Component | Description |
+| :--- | :--- | :--- |
+| **Backend API** | [FastAPI](https://fastapi.tiangolo.com/) | REST API with asynchronous request dispatch and CORS handling |
+| **Data Storage** | [SQLite](https://www.sqlite.org/) | Relational database with composite indexing |
+| **ETL & Data Sourcing** | BeautifulSoup4, Requests, Pandas | Automated scrapers for JoSAA portal datasets |
+| **Frontend UI** | HTML5, Modern CSS Glassmorphism, Vanilla JS | Lightweight zero-dependency reactive interface |
+
+---
+
+## 📂 Directory Structure
+
+```text
+josaa/
 ├── data/
-│   ├── josaa_raw/              # Raw data backups (master ALL.json and seat matrix json)
-│   └── nirf_rankings_2025.json # Static NIRF ranking dataset
+│   ├── josaa_raw/              # Raw JoSAA historical datasets & seat matrices
+│   └── nirf_rankings_2025.json # Static NIRF ranking dataset for 132+ institutions
 ├── data_sourcing/
 │   ├── scraper.py              # On-demand individual rankings scraper
 │   ├── seat_matrix_scraper.py  # Crawls the official JoSAA seat matrix
 │   └── bulk_scraper.py         # Multi-threaded verified bulk rankings downloader
 ├── static/
-│   ├── index.html              # Main frontend HTML markup
-│   ├── style.css               # Styled visual layout and theme parameters
-│   └── app.js                  # Frontend client application logic
+│   ├── index.html              # Main frontend dashboard
+│   ├── style.css               # Glassmorphism styling and theme accents
+│   └── app.js                  # Frontend client application logic & state
 ├── db.py                       # SQLite DB initialization & category parser
 ├── main.py                     # FastAPI backend server
-├── requirements.txt            # Python dependencies lists
-└── run.sh                      # Shell launch launcher
+├── requirements.txt            # Python dependencies
+└── run.sh                      # Shell launch script
 ```
 
 ---
 
-## Installation & Setup
+## 🚀 Quick Start Guide
 
-1. **Clone the Repository**:
-   ```bash
-   git clone <your-repository-url>
-   cd josaa
-   ```
+### 1. Clone the Repository
+```bash
+git clone https://github.com/AnupamKhurana/josaa-rankings-explorer.git
+cd josaa-rankings-explorer
+```
 
-2. **Setup Virtual Environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
+### 2. Set Up Virtual Environment & Dependencies
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-3. **Populate Database**:
-   Run the database initialization script. It will scan `data/josaa_raw/`, import the master data, and configure the optimized indexes:
-   ```bash
-   python3 db.py
-   ```
+### 3. Populate Database
+Initialize the SQLite database with historical JoSAA rounds and NIRF rankings:
+```bash
+python3 db.py
+```
 
-4. **Launch Server**:
-   Execute the run script or start Uvicorn directly:
-   ```bash
-   ./run.sh
-   ```
-   The application will be live at `http://localhost:8000`.
+### 4. Launch Application
+```bash
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+*(Or use `./run.sh`)*
+
+Open your browser at: **`http://localhost:8000`**
 
 ---
 
-## Sourcing New Data
+## 🕷️ Sourcing New Admissions Data
 
-To fetch fresh records from the admissions portal, run the scripts inside the `data_sourcing/` folder:
-- **Fetch Seat Matrix**: `python3 data_sourcing/seat_matrix_scraper.py`
-- **Bulk Fetch Ranks**: `python3 data_sourcing/bulk_scraper.py` (Automatically checks for cached rounds and crawls missing ones).
+To fetch fresh records from the official portal for new admission rounds:
+- **Fetch Seat Matrix:** `python3 data_sourcing/seat_matrix_scraper.py`
+- **Bulk Fetch Ranks:** `python3 data_sourcing/bulk_scraper.py` (Automatically checks cached rounds and downloads missing records).
 
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See `LICENSE` for details.
