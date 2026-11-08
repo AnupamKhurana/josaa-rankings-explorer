@@ -453,6 +453,8 @@ def get_ranks(
     sort_by: str = "closing_rank",
     sort_desc: bool = False,
     home_state: str = None,
+    user_mains_rank: int = None,
+    user_adv_rank: int = None,
     page: int = 1,
     limit: int = 50
 ):
@@ -494,13 +496,22 @@ def get_ranks(
         GROUP BY r.institute, r.program, r.quota, r.seat_type, r.gender, i.state, i.exam_type
     """
     
+    user_mains_rank_val = user_mains_rank or 0
+    user_adv_rank_val = user_adv_rank or 0
+
     query = f"""
         SELECT institute, program, quota, seat_type, gender,
                opening_2025, closing_2025, closing_2024, closing_2023, closing_2022,
                opening_2025_str, closing_2025_str, closing_2024_str, closing_2023_str, closing_2022_str,
                institute_state, exam_type,
                COALESCE(opening_2025, 999999) AS opening_rank,
-               COALESCE(closing_2025, closing_2024, closing_2023, closing_2022, 999999) AS closing_rank
+               COALESCE(closing_2025, closing_2024, closing_2023, closing_2022, 999999) AS closing_rank,
+               CASE 
+                   WHEN exam_type = 'JEE-Advanced' THEN 
+                       (CASE WHEN {user_adv_rank_val} > 0 AND COALESCE(closing_2025, closing_2024, closing_2023, closing_2022, 999999) < 999999 THEN CAST(COALESCE(closing_2025, closing_2024, closing_2023, closing_2022, 999999) AS REAL) / {user_adv_rank_val} ELSE NULL END)
+                   ELSE 
+                       (CASE WHEN {user_mains_rank_val} > 0 AND COALESCE(closing_2025, closing_2024, closing_2023, closing_2022, 999999) < 999999 THEN CAST(COALESCE(closing_2025, closing_2024, closing_2023, closing_2022, 999999) AS REAL) / {user_mains_rank_val} ELSE NULL END)
+               END AS standardized_ratio
         FROM ({base_query})
         WHERE 1=1
     """
@@ -581,13 +592,16 @@ def get_ranks(
         "institute": "institute",
         "program": "program",
         "quota": "quota",
-        "gender": "gender"
+        "gender": "gender",
+        "standardized_ratio": "standardized_ratio"
     }
     sort_column = valid_sorts.get(sort_by, "closing_rank")
     direction = "DESC" if sort_desc else "ASC"
     
     if sort_column in ["opening_rank", "closing_rank"]:
         query += f" ORDER BY CASE WHEN {sort_column} >= 999999 THEN 1 ELSE 0 END, {sort_column} {direction}"
+    elif sort_column == "standardized_ratio":
+        query += f" ORDER BY CASE WHEN standardized_ratio IS NULL THEN 1 ELSE 0 END, standardized_ratio {direction}"
     else:
         query += f" ORDER BY {sort_column} {direction}"
         

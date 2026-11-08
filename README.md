@@ -1,5 +1,8 @@
 # JoSAA Rankings Explorer
 
+> **App Root Folder:** `/mnt/1fc0b605-b95c-4190-ba0a-ae87f22cc120/development/josaa`
+
+
 An interactive, premium web application designed to analyze, filter, and explore JoSAA (Joint Seat Allocation Authority) opening and closing ranks cutoffs, alongside active seat matrix distributions and newly introduced engineering courses.
 
 ## Features

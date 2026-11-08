@@ -526,6 +526,7 @@ async function fetchRanks() {
         url += `&adv_min=${state.advMin}`;
         url += `&filter_mains=${state.chkFilterMains}&filter_adv=${state.chkFilterAdv}`;
         url += `&home_state=${state.homeState}`;
+        url += `&user_mains_rank=${state.rankMains || 0}&user_adv_rank=${state.rankAdv || 0}`;
         
         const res = await fetch(url);
         const data = await res.json();
@@ -595,6 +596,20 @@ function renderTable(ranks, roundsUsed) {
             <td>${r.gender}</td>
             <td>${formatNumber(r.opening_2025)}</td>
             <td>${formatRankCell(r.closing_2025, "2025")}</td>
+            <td>${(function() {
+                if (r.standardized_ratio !== undefined && r.standardized_ratio !== null) {
+                    const ratioVal = r.standardized_ratio;
+                    const formattedRatio = ratioVal.toFixed(2) + 'x';
+                    const isSafe = ratioVal >= 1.0;
+                    const color = isSafe ? '#10b981' : '#f87171';
+                    const statusText = isSafe ? 'Safe / Within Reach' : 'Ambitious';
+                    const refRankName = r.exam_type === 'JEE-Advanced' ? 'JEE Advanced' : 'JEE Main';
+                    const refRankVal = r.exam_type === 'JEE-Advanced' ? state.rankAdv : state.rankMains;
+                    const tooltipTitle = `Closing Rank: ${formatNumber(r.closing_rank)} vs Your ${refRankName} Rank: ${formatNumber(refRankVal)} (${statusText})`;
+                    return `<span style="color: ${color}; font-weight: 600;" title="${tooltipTitle}">${formattedRatio}</span>`;
+                }
+                return '-';
+            })()}</td>
             <td>${formatRankCell(r.closing_2024, "2024")}</td>
             <td>${formatRankCell(r.closing_2023, "2023")}</td>
             <td>${formatRankCell(r.closing_2022, "2022")}</td>
@@ -759,6 +774,7 @@ async function exportCSV() {
         url += `&mains_min=${state.mainsMin}&mains_max=${state.mainsMax}`;
         url += `&adv_min=${state.advMin}&adv_max=${state.advMax}`;
         url += `&filter_mains=${state.chkFilterMains}&filter_adv=${state.chkFilterAdv}`;
+        url += `&user_mains_rank=${state.rankMains || 0}&user_adv_rank=${state.rankAdv || 0}`;
         
         const res = await fetch(url);
         const data = await res.json();
@@ -769,7 +785,7 @@ async function exportCSV() {
         }
         
         // CSV header
-        let csvContent = "Institute,Academic Program Name,Quota,Seat Type,Gender,Opening 2025,Closing 2025,Closing 2024,Closing 2023,Closing 2022\n";
+        let csvContent = "Institute,Academic Program Name,Quota,Seat Type,Gender,Opening 2025,Closing 2025,Ratio,Closing 2024,Closing 2023,Closing 2022\n";
         
         data.ranks.forEach(r => {
             const line = [
@@ -780,6 +796,7 @@ async function exportCSV() {
                 `"${r.gender}"`,
                 r.opening_2025_str || "N/A",
                 r.closing_2025_str || "N/A",
+                r.standardized_ratio ? `${r.standardized_ratio.toFixed(2)}x` : "N/A",
                 r.closing_2024_str || "N/A",
                 r.closing_2023_str || "N/A",
                 r.closing_2022_str || "N/A"
